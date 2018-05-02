@@ -2,12 +2,19 @@ require_relative './account_number_geometry'
 
 class AccountNumberReader
   def initialize
-    alphabet_text = IO.read("alphabet.txt").chars.reject do |ch|
-      ch == "\n"
-    end
+    # TODO: Extract alphabet into separate class.
+    alphabet_text = without_line_endings(IO.read("alphabet.txt"))
     alphabet_geometry = AccountNumberGeometry.new(digits: 10)
     # @patterns is a Hash mapping arrays of characters to the character represented.
     @patterns = build_patterns(text: alphabet_text, geometry: alphabet_geometry)
+
+    @recog_geometry = AccountNumberGeometry.new(digits: 9)
+  end
+
+  def without_line_endings(text)
+    text.chars.reject do |ch|
+      ch == "\n"
+    end
   end
 
   def build_patterns(text:, geometry:)
@@ -25,11 +32,9 @@ class AccountNumberReader
   # found in the text for that position.
   def digit_chars(text:)
     grouped_by_pos = {}
-    chars = text.chars.reject do |ch|
-      ch == "\n"
-    end
+    chars = without_line_endings(text)
     chars.each_with_index do |ch, ix|
-      digit_pos = (ix % 27) / 3
+      digit_pos = (ix % @recog_geometry.char_width) / @recog_geometry.digit_char_width
       (grouped_by_pos[digit_pos] ||= []) << ch
     end
     grouped_by_pos
