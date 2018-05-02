@@ -1,24 +1,8 @@
-require 'minitest/autorun'
-
-class AccountNumberGeometry
-  def initialize(digits: 10)
-    @char_width = digits * 3
-  end
-
-  # Returns an array of offsets into the grid that would represent the number
-  # at the given position (0-9).
-  def offsets(pos:)
-    4.times.flat_map do |row|
-      3.times.map do |col|
-        (row * @char_width) + (pos * 3) + col
-      end
-    end
-  end
-end
+require_relative './account_number_geometry'
 
 class AccountNumberReader
   def initialize
-    alphabet_text = IO.read("ex1.txt").chars.reject do |ch|
+    alphabet_text = IO.read("alphabet.txt").chars.reject do |ch|
       ch == "\n"
     end
     alphabet_geometry = AccountNumberGeometry.new(digits: 10)
@@ -56,49 +40,15 @@ class AccountNumberReader
   # characters are not recognized.
   def recognize(text:)
     recognized_chars = digit_chars(text: text).map do |pos, chars|
+      # TODO: In order to find ambiguous matches, change this to determine all
+      # possible matches for each digit. Return the result as an array of
+      # arrays, where the inner array contains each valid digit.
+      #
+      # Use that array of arrays in FileReport. Generate candidates, test them
+      # using checksum, and stop when multiple valid candidates are found.
       @patterns[chars] || "?"
     end
     recognized_chars.join
   end
 end
-
-describe AccountNumberReader, "" do
-  PrimaryExampleText = <<-END
-    _  _     _  _  _  _  _ 
-  | _| _||_||_ |_   ||_||_|
-  ||_  _|  | _||_|  ||_| _|
-                           
-  END
-
-  before do
-    @reader = AccountNumberReader.new
-  end
-
-  it "recognizes canonical example" do
-    assert_equal "123456789", @reader.recognize(text: PrimaryExampleText)
-  end
-
-  it "recognizes another example" do
-    input = <<-END
- _  _  _     _  _  _  _    
-|_| _| _||_||_ |_   ||_|  |
- _||_  _|  | _||_|  ||_|  |
-                           
-    END
-    assert_equal "923456781", @reader.recognize(text: input)
-  end
-
-  it "uses placeholders for unrecognized digits" do
-    input = <<-END
- _  _  _     _     _  _    
-|_| _| _|   |_      ||_|  |
- _||_  _|    _|     ||_|  |
-                           
-    END
-    assert_equal "923?5?781", @reader.recognize(text: input)
-  end
-end
-
-
-
 

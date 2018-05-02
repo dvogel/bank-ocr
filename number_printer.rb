@@ -1,7 +1,12 @@
-# Utility class, mainly used from the repl to print out test case numbers.
+require_relative './account_number_geometry'
+
+# Utility class, mainly used from the repl to print out test case numbers. For example:
+#
+#   NumberPrinter.new.print(number: "3210987654", outstream: $stdout)
+#
 class NumberPrinter
   def initialize
-    @alphabet_text = IO.read("ex1.txt").chars.reject do |ch|
+    @alphabet_text = IO.read("alphabet.txt").chars.reject do |ch|
       ch == "\n"
     end
     @alphabet_geometry = AccountNumberGeometry.new(digits: 10)
